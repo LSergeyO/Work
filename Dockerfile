@@ -1,17 +1,38 @@
-FROM ubuntu:20.04
+FROM alpine:3.14
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    apt-get install -y gnupg2 python3-pip sshpass vim mc git openssh-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
-    
-RUN python3 -m pip install --upgrade pip cffi && \
-    pip install ansible==2.9.27 && \
-    pip install mitogen==0.2.10 ansible-lint==5.4.0 jmespath && \
+RUN CARGO_NET_GIT_FETCH_WITH_CLI=1 && \
+    apk --no-cache add \
+        sudo \
+        python3\
+        py3-pip \
+        openssl \
+        ca-certificates \
+        sshpass \
+        openssh-client \
+        bash \
+        rsync \
+        git && \
+    apk --no-cache add --virtual build-dependencies \
+        python3-dev \
+        libffi-dev \
+        musl-dev \
+        gcc \
+        cargo \
+        openssl-dev \
+        libressl-dev \
+        build-base && \
+    pip install --upgrade pip wheel && \
+    pip install --upgrade cryptography cffi && \
+    pip uninstall ansible-base && \
+    pip install ansible-core && \
+    pip install ansible==2.10.0 && \
+    pip install mitogen ansible-lint jmespath && \
     pip install --upgrade pywinrm && \
-    ansible-galaxy install Juniper.junos && \
-    ansible-galaxy collection install junipernetworks.junos && \
-    rm -rf /root/.cache/pip
+    pip install ncclient && \
+    apk del build-dependencies && \
+    rm -rf /var/cache/apk/* && \
+    rm -rf /root/.cache/pip && \
+    rm -rf /root/.cargo
 
 RUN mkdir /ansible && \
     mkdir -p /etc/ansible && \
