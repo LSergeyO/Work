@@ -1,7 +1,9 @@
-[testrouter]
+[junos]
 #pavlova64_mag7
 90.188.48.72
 
-[prodrouter]
-#pavlova64_mag7
-90.188.48.72
+[junos:vars]
+ansible_connection=network_cli
+ansible_network_os=junos
+ansible_user=lytkinso
+ansible_password=Password
