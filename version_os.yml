@@ -1,38 +1,28 @@
 ---
-- name: juniper version view
-  hosts: testrouter
-# bibl Juniper
-  roles:
-  - Juniper.junos
-  connection: local
+- hosts: junos
   gather_facts: no
-# interpritator python
-  vars:
-    ansible_python_interpreter: /usr/bin/python
-# dannye dlya podklyucheniya
+
   vars_prompt:
   - name: USERNAME
     prompt: Username
-    private: yes
+    private: no
   - name: PASSWORD
     prompt: Password
     private: yes
-# command for Juniper
+
+  vars:
+    ansible_user: "{{ USERNAME }}"
+    ansible_password: "{{ PASSWORD }}"
+
   tasks:
-  - name: Retrieve information from devices running Junnos OS
+  - name: Get Version
     junos_command:
-      host: "{{ inventory_hostname }}"
-      username: "{{ USERNAME }}"
-      password: "{{ PASSWORD }}"
-      timeout: 120
-      port: 22
       commands:
         - show version
-# peremenniya
     register: printout
   - name: Save Output
-#debug: msg="{{printout.stdout_lines}}"
     lineinfile:
       path: versions.log
       create: yes
       line: "{{printout.stdout_lines}}"
+    register: version
